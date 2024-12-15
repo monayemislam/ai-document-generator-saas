@@ -1,11 +1,14 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
+import RevenueChart from '@/Components/Charts/RevenueChart.vue';
+import ProjectStatusChart from '@/Components/Charts/ProjectStatusChart.vue';
 
 defineProps({
     stats: Object,
     recentClients: Array,
     recentProjects: Array,
+    chartData: Object,
 });
 </script>
 
@@ -53,6 +56,19 @@ defineProps({
                         <dd class="mt-1 text-3xl font-semibold text-gray-900">
                             ${{ stats.pending_amount.toLocaleString() }}
                         </dd>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+                    <!-- Revenue Chart -->
+                    <div class="overflow-hidden rounded-lg bg-white p-6 shadow">
+                        <RevenueChart :chart-data="chartData.revenue" />
+                    </div>
+
+                    <!-- Project Status Chart -->
+                    <div class="overflow-hidden rounded-lg bg-white p-6 shadow">
+                        <ProjectStatusChart :chart-data="chartData.projectStatus" />
                     </div>
                 </div>
 
