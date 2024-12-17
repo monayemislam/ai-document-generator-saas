@@ -39,6 +39,9 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Dashboard
                                 </NavLink>
+                                <NavLink :href="route('documents.create')" :active="route().current('documents.create')">
+                                    Generate Document
+                                </NavLink>
                             </div>
                         </div>
 
