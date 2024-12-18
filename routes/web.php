@@ -21,10 +21,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/documents/create', function () {
         return Inertia::render('Documents/Create');
     })->name('documents.create');
-    Route::post('/api/generate-document', [DocumentController::class, 'generate']);
+    Route::post('/documents/generate', [DocumentController::class, 'generate'])->name('documents.generate');
+    Route::get('/documents/{document}', [DocumentController::class, 'show'])->name('documents.show');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
 });
 
 require __DIR__.'/auth.php';
