@@ -71,8 +71,9 @@ class DocumentController extends Controller
                 $logoPath = $path; // Store the path without 'public/'
             }
 
-            // Create new document
+            // Create new document with user_id
             $document = Document::create([
+                'user_id' => $request->user()->id,
                 'client_name' => $request->client_name,
                 'company_name' => $request->company_name,
                 'contact_person' => $request->contact_person,
@@ -154,9 +155,11 @@ class DocumentController extends Controller
     /**
      * Display a listing of the documents.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $documents = Document::latest()->paginate(10);
+        $documents = Document::where('user_id', $request->user()->id)
+            ->latest()
+            ->paginate(10);
         
         return Inertia::render('Documents/Index', [
             'documents' => $documents
