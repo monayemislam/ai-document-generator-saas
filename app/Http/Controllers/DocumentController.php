@@ -162,4 +162,18 @@ class DocumentController extends Controller
             'documents' => $documents
         ]);
     }
+
+    public function destroy(Document $document)
+    {
+        // Delete the logo file if it exists
+        if ($document->logo_path) {
+            Storage::disk('public')->delete($document->logo_path);
+        }
+
+        // Delete the document (related items will be deleted via cascade)
+        $document->delete();
+
+        return redirect()->route('documents.index')
+            ->with('message', 'Document deleted successfully');
+    }
 }

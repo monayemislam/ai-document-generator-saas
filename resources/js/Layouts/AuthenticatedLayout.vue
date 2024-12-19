@@ -42,6 +42,7 @@ const showingNavigationDropdown = ref(false);
                                 <NavLink :href="route('documents.create')" :active="route().current('documents.create')">
                                     Generate Document
                                 </NavLink>
+                                <NavLink :href="route('documents.index')" :active="route().current('documents.index')">All Documents</NavLink>
                             </div>
                         </div>
 
