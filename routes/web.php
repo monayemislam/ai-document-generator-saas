@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\ClientController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -28,6 +29,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
     Route::delete('/documents/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
+    Route::get('/documents/{document}/pdf', [DocumentController::class, 'downloadPdf'])->name('documents.pdf');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('clients', ClientController::class);
 });
 
 require __DIR__.'/auth.php';

@@ -7,6 +7,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
+
 
 class DocumentController extends Controller
 {
@@ -178,5 +182,33 @@ class DocumentController extends Controller
 
         return redirect()->route('documents.index')
             ->with('message', 'Document deleted successfully');
+    }
+
+    public function downloadPdf(Document $document)
+    {
+        if (Gate::denies('view', $document)) {
+            abort(403);
+        }
+
+        try {
+            $pdf = Pdf::loadView('pdf.document', [
+                'document' => $document,
+                'date' => now()->format('F d, Y')
+            ])->setOptions([
+                'defaultFont' => 'sans-serif',
+                'isRemoteEnabled' => true,
+                'isHtml5ParserEnabled' => true,
+                'defaultPaperSize' => 'a4',
+            ]);
+
+            // Force download the PDF
+            return response($pdf->output())
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'attachment; filename="' . $document->project_title . '.pdf"');
+
+        } catch (\Exception $e) {
+            \Log::error('PDF Generation Error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to generate PDF');
+        }
     }
 }

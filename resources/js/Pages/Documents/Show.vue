@@ -34,17 +34,18 @@ const handleImageLoad = () => {
                     Document Details
                 </h2>
                 <div class="flex space-x-4">
-                    <button 
-                        @click="window.print()" 
-                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-                    >
-                        Print Document
-                    </button>
                     <Link 
                         :href="route('documents.index')" 
                         class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition"
                     >
                         Back to List
+                    </Link>
+                    <Link 
+                        :href="route('documents.pdf', document.id)"
+                        class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                        target="_blank"
+                    >
+                        Download PDF
                     </Link>
                 </div>
             </div>
