@@ -1,23 +1,13 @@
 <script setup>
-import { Bar } from 'vue-chartjs';
+import { Doughnut } from 'vue-chartjs';
 import {
     Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
+    ArcElement,
     Tooltip,
     Legend
 } from 'chart.js';
 
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend
-);
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 defineProps({
     chartData: {
@@ -38,22 +28,13 @@ const options = {
             }
         }
     },
-    scales: {
-        y: {
-            beginAtZero: true,
-            ticks: {
-                callback: function(value) {
-                    return '$' + value.toLocaleString();
-                }
-            }
-        }
-    }
+    cutout: '60%'
 };
 </script>
 
 <template>
     <div style="height: 300px">
-        <Bar 
+        <Doughnut 
             :data="chartData"
             :options="options"
         />

@@ -2,13 +2,25 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import RevenueChart from '@/Components/Charts/RevenueChart.vue';
-import ProjectStatusChart from '@/Components/Charts/ProjectStatusChart.vue';
+import DocumentStatusChart from '@/Components/Charts/DocumentStatusChart.vue';
 
 defineProps({
-    stats: Object,
-    recentClients: Array,
-    recentProjects: Array,
-    chartData: Object,
+    stats: {
+        type: Object,
+        required: true
+    },
+    recentClients: {
+        type: Object,
+        required: true
+    },
+    recentDocuments: {
+        type: Object,
+        required: true
+    },
+    chartData: {
+        type: Object,
+        required: true
+    }
 });
 </script>
 
@@ -34,11 +46,11 @@ defineProps({
                         </dd>
                     </div>
 
-                    <!-- Projects Card -->
+                    <!-- Documents Card -->
                     <div class="overflow-hidden rounded-lg bg-white p-6 shadow">
-                        <dt class="truncate text-sm font-medium text-gray-500">Total Projects</dt>
+                        <dt class="truncate text-sm font-medium text-gray-500">Total Documents</dt>
                         <dd class="mt-1 text-3xl font-semibold text-gray-900">
-                            {{ stats.total_projects }}
+                            {{ stats.total_documents }}
                         </dd>
                     </div>
 
@@ -46,7 +58,7 @@ defineProps({
                     <div class="overflow-hidden rounded-lg bg-white p-6 shadow">
                         <dt class="truncate text-sm font-medium text-gray-500">Total Revenue</dt>
                         <dd class="mt-1 text-3xl font-semibold text-gray-900">
-                            ${{ stats.total_revenue.toLocaleString() }}
+                            ${{ (stats.total_revenue || 0).toLocaleString() }}
                         </dd>
                     </div>
 
@@ -54,7 +66,7 @@ defineProps({
                     <div class="overflow-hidden rounded-lg bg-white p-6 shadow">
                         <dt class="truncate text-sm font-medium text-gray-500">Pending Amount</dt>
                         <dd class="mt-1 text-3xl font-semibold text-gray-900">
-                            ${{ stats.pending_amount.toLocaleString() }}
+                            ${{ (stats.pending_amount || 0).toLocaleString() }}
                         </dd>
                     </div>
                 </div>
@@ -63,12 +75,14 @@ defineProps({
                 <div class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
                     <!-- Revenue Chart -->
                     <div class="overflow-hidden rounded-lg bg-white p-6 shadow">
+                        <h3 class="text-lg font-medium text-gray-900">Revenue Overview</h3>
                         <RevenueChart :chart-data="chartData.revenue" />
                     </div>
 
-                    <!-- Project Status Chart -->
+                    <!-- Document Status Chart -->
                     <div class="overflow-hidden rounded-lg bg-white p-6 shadow">
-                        <ProjectStatusChart :chart-data="chartData.projectStatus" />
+                        <h3 class="text-lg font-medium text-gray-900">Document Status</h3>
+                        <DocumentStatusChart :chart-data="chartData.documentStatus" />
                     </div>
                 </div>
 
@@ -97,21 +111,30 @@ defineProps({
                         </div>
                     </div>
 
-                    <!-- Recent Projects -->
+                    <!-- Recent Documents -->
                     <div class="overflow-hidden rounded-lg bg-white shadow">
                         <div class="p-6">
-                            <h3 class="text-lg font-medium text-gray-900">Recent Projects</h3>
+                            <h3 class="text-lg font-medium text-gray-900">Recent Documents</h3>
                             <div class="mt-6 flow-root">
                                 <ul class="-my-5 divide-y divide-gray-200">
-                                    <li v-for="project in recentProjects" :key="project.id" class="py-5">
+                                    <li v-for="document in recentDocuments" :key="document.id" class="py-5">
                                         <div class="flex items-center space-x-4">
                                             <div class="min-w-0 flex-1">
                                                 <p class="truncate text-sm font-medium text-gray-900">
-                                                    {{ project.name }}
+                                                    {{ document.project_title }}
                                                 </p>
                                                 <p class="truncate text-sm text-gray-500">
-                                                    {{ project.client.name }}
+                                                    {{ document.client_name }}
                                                 </p>
+                                                <p class="mt-1 text-xs text-gray-500">
+                                                    {{ document.project_type }} • Created {{ new Date(document.created_at).toLocaleDateString() }}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <Link :href="route('documents.show', document.id)"
+                                                    class="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                                                    View
+                                                </Link>
                                             </div>
                                         </div>
                                     </li>
