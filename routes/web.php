@@ -34,6 +34,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::resource('clients', ClientController::class);
+    Route::get('/documents/create', [DocumentController::class, 'create'])->name('documents.create');
+    Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
 });
 
 require __DIR__.'/auth.php';

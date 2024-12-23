@@ -10,6 +10,7 @@ use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
+use App\Models\Client;
 
 
 class DocumentController extends Controller
@@ -17,18 +18,7 @@ class DocumentController extends Controller
     public function generate(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            // Client Information
-            'client_name' => 'required|string|max:255',
-            'company_name' => 'required|string|max:255',
-            'contact_person' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:20',
-            'street_address' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
-            'state' => 'required|string|max:255',
-            'zip_code' => 'required|string|max:20',
-            'country' => 'required|string|max:255',
-
+            'client_id' => 'required|exists:clients,id',
             // Project Details
             'project_title' => 'required|string|max:255',
             'project_description' => 'required|string',
@@ -68,26 +58,21 @@ class DocumentController extends Controller
         }
 
         try {
-            // Handle logo upload if present
-            $logoPath = null;
-            if ($request->hasFile('logo')) {
-                $path = $request->file('logo')->store('logos', 'public');
-                $logoPath = $path; // Store the path without 'public/'
-            }
-
-            // Create new document with user_id
+            $client = Client::findOrFail($request->client_id);
+            
             $document = Document::create([
-                'user_id' => $request->user()->id,
-                'client_name' => $request->client_name,
-                'company_name' => $request->company_name,
-                'contact_person' => $request->contact_person,
-                'email' => $request->email,
-                'phone' => $request->phone,
-                'street_address' => $request->street_address,
-                'city' => $request->city,
-                'state' => $request->state,
-                'zip_code' => $request->zip_code,
-                'country' => $request->country,
+                'user_id' => auth()->id(),
+                'client_id' => $client->id,
+                'client_name' => $client->name,
+                'company_name' => $client->company_name,
+                'contact_person' => $client->name,
+                'email' => $client->email,
+                'phone' => $client->phone,
+                'street_address' => $client->address,
+                'city' => $client->city,
+                'state' => $client->state,
+                'zip_code' => $client->postal_code,
+                'country' => $client->country,
                 'project_title' => $request->project_title,
                 'project_description' => $request->project_description,
                 'start_date' => $request->start_date,
@@ -104,7 +89,7 @@ class DocumentController extends Controller
                 'revision_policy' => $request->revision_policy,
                 'terms_agreed' => $request->terms_agreed,
                 'custom_message' => $request->custom_message,
-                'logo_path' => $logoPath,
+                'logo_path' => null,
                 'color_scheme' => $request->color_scheme,
                 'project_scope' => $request->project_scope,
             ]);
@@ -210,5 +195,12 @@ class DocumentController extends Controller
             \Log::error('PDF Generation Error: ' . $e->getMessage());
             return back()->with('error', 'Failed to generate PDF');
         }
+    }
+
+    public function create()
+    {
+        return Inertia::render('Documents/Create', [
+            'clients' => auth()->user()->clients()->select('id', 'name', 'company_name')->get()
+        ]);
     }
 }

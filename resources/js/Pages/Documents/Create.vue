@@ -1,8 +1,19 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 import { ref, reactive, watch, onMounted, onBeforeUnmount } from 'vue';
 import axios from 'axios';
+
+// Define props
+const props = defineProps({
+    clients: {
+        type: Array,
+        required: true
+    }
+});
+
+// Add this line to debug
+console.log('Available clients:', props.clients);
 
 const states = [
     'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
@@ -14,20 +25,9 @@ const countries = [
     // ... add more countries or customize for your needs
 ]
 
-const form = reactive({
-    // Client Information
-    client_name: '',
-    company_name: '',
-    contact_person: '',
-    email: '',
-    phone: '',
-    street_address: '',
-    city: '',
-    state: 'Alabama',
-    zip_code: '',
-    country: 'United States',
-
-    // Project Details
+// Use form with client_id
+const form = useForm({
+    client_id: '',
     project_title: '',
     project_description: '',
     start_date: new Date().toISOString().split('T')[0],
@@ -35,25 +35,19 @@ const form = reactive({
     priority_level: 'medium',
     project_type: 'development',
     project_scope: '',
-
-    // Pricing (at least one is required)
+    
+    // Keep other existing fields...
     hourly_rate: '',
     fixed_price: '',
     estimated_hours: '',
     items: [],
-
-    // Payment Terms
     payment_method: 'bank_transfer',
     payment_due_date: new Date().toISOString().split('T')[0],
     payment_schedule: 'net_30',
-
-    // Additional Terms
     cancellation_policy: 'Standard 30-day cancellation notice required.',
     revision_policy: 'Up to 2 rounds of revisions included.',
     custom_message: '',
     terms_agreed: false,
-
-    // Branding
     logo: null,
     color_scheme: '#000000',
 });
@@ -212,6 +206,16 @@ onBeforeUnmount(() => {
         URL.revokeObjectURL(logoPreviewUrl.value)
     }
 })
+
+const submit = () => {
+    form.post(route('documents.store'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            // Handle success
+            form.reset();
+        },
+    });
+};
 </script>
 
 <template>
@@ -232,83 +236,25 @@ onBeforeUnmount(() => {
 
                 <form @submit.prevent="submitForm" class="space-y-6">
                     <!-- Client Information Section -->
-                    <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="mb-8">
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Client Information</h3>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Client Name</label>
-                                <input 
-                                    v-model="form.client_name" 
-                                    type="text" 
-                                    class="mt-1 block w-full rounded-md border-gray-300"
-                                    :class="{ 'border-red-500': errors.client_name }"
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Select Client</label>
+                            <select 
+                                v-model="form.client_id"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            >
+                                <option value="">Select a client</option>
+                                <option 
+                                    v-for="client in clients" 
+                                    :key="client.id" 
+                                    :value="client.id"
                                 >
-                                <p v-if="errors.client_name" class="mt-1 text-sm text-red-600">
-                                    {{ errors.client_name[0] }}
-                                </p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Company Name</label>
-                                <input v-model="form.company_name" type="text" class="mt-1 block w-full rounded-md border-gray-300">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Contact Person</label>
-                                <input v-model="form.contact_person" type="text" class="mt-1 block w-full rounded-md border-gray-300">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Email Address</label>
-                                <input v-model="form.email" type="email" class="mt-1 block w-full rounded-md border-gray-300">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Phone Number</label>
-                                <input v-model="form.phone" type="tel" class="mt-1 block w-full rounded-md border-gray-300">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Address Fields -->
-                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="col-span-2">
-                            <label class="block text-sm font-medium text-gray-700">Street Address</label>
-                            <input v-model="form.street_address" type="text" class="mt-1 block w-full rounded-md border-gray-300">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">City</label>
-                            <input v-model="form.city" type="text" class="mt-1 block w-full rounded-md border-gray-300">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">State/Province</label>
-                            <select 
-                                v-model="form.state" 
-                                class="mt-1 block w-full rounded-md border-gray-300"
-                                :class="{ 'border-red-500': errors.state }"
-                            >
-                                <option v-for="state in states" :key="state" :value="state">
-                                    {{ state }}
+                                    {{ client.name }} {{ client.company_name ? `- ${client.company_name}` : '' }}
                                 </option>
                             </select>
-                            <p v-if="errors.state" class="mt-1 text-sm text-red-600">
-                                {{ errors.state[0] }}
-                            </p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Zip/Postal Code</label>
-                            <input v-model="form.zip_code" type="text" class="mt-1 block w-full rounded-md border-gray-300">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Country</label>
-                            <select 
-                                v-model="form.country" 
-                                class="mt-1 block w-full rounded-md border-gray-300"
-                                :class="{ 'border-red-500': errors.country }"
-                            >
-                                <option v-for="country in countries" :key="country" :value="country">
-                                    {{ country }}
-                                </option>
-                            </select>
-                            <p v-if="errors.country" class="mt-1 text-sm text-red-600">
-                                {{ errors.country[0] }}
+                            <p v-if="form.errors.client_id" class="mt-1 text-sm text-red-600">
+                                {{ form.errors.client_id }}
                             </p>
                         </div>
                     </div>
